@@ -4,6 +4,7 @@ namespace App\Http\Controllers\customer;
 
 use App\Models\User;
 use App\Models\Account;
+use App\Models\Transfer;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
@@ -37,33 +38,64 @@ class TransferController extends Controller
         ]);
 
 
-        $account = User::find(Auth::user()->id)->account()->first();
+        $fromAccount = User::find(Auth::user()->id)->account()->first();
+        $toAccount = Account::where("account_number", $req->dest_accountnumber)->with("user")->first();
 
-        if(!empty($account))
+        if(!empty($fromAccount))
         {
-            $purple_user = Account::where("account_number", $req->dest_accountnumber)->with("user")->first();
-
-            if(!is_null($purple_user))
+            if(!is_null($toAccount))
             {
-                if($account->account_balance > $req->amount)
+                if($fromAccount->account_balance > $req->amount)
                 {
-                    if(Hash::check($req->transaction_pin, $account?->transaction_pin))
+                    if(Hash::check($req->transaction_pin, $fromAccount?->transaction_pin))
                     {
-                        
-                        $save = Transaction::create([
-                            "user_id" => $account->user_id,
-                            "transaction_type"  => "deposit",
+
+                        $transfer = Transfer::create([
+                            //
+                            "transfer_uuid" => Str::uuid(),
+                            "from_account_id" => $fromAccount->id,
+                            "to_account_id" => $toAccount->id,
                             "amount" => $req->amount,
-                            "description" => $req->description,
-                            "request_id" =>  Str::uuid(),
-                            "reference"  => Str::uuid(),
-                            "status"  => 'success'
+                            "transfer_type" => "internal",
+                            "status" => "pending",
+                            // "completed_at" => "",
+                            'reference' => 'PUR-INT' . uniqid(),
+                            'description' => $req->description,
                         ]);
-        
-                        if($save)
+
+                        try 
                         {
-                            $purple_user->increment('account_balance', $req->amount);
-                            return back()->with("success", "Deposit Successful");
+                            $toAccount->increment('account_balance', $req->amount);
+                            $fromAccount->decrement('account_balance', $req->amount);
+
+                            $transfer->status = 'completed';
+                            $transfer->completed_at = now();
+                            $transfer->save();
+
+                            
+                            $transaction = Transaction::create([
+                                
+                                "transaction_uuid" => Str::uuid(),
+                                "account_id" => $fromAccount->id,
+                                "transfer_id" => $transfer->id,
+                                "transaction_type"  => "debit",
+                                "amount" => $req->amount,
+                                "balance_after" => $fromAccount->account_balance,
+                                "description" => $req->description,
+                            ]);
+            
+                            if($transaction)
+                            {
+                                return back()->with("success", "Transfer Successful");
+                            }
+                            
+                        } 
+                        catch (\Throwable $th) 
+                        {
+                            $transfer->status = 'failed';
+                            $transfer->save();
+        
+                            return back()->with("error", "Transfer Failed - $th");
                         }
     
                     }else{
@@ -78,7 +110,7 @@ class TransferController extends Controller
 
             }else{
                     
-                return back()->withErrors("error", "Invalid purple account");
+                return back()->withErrors("error", "Invalid account");
             }
 
         }else{
