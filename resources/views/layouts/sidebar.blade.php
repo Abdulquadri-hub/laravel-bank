@@ -13,7 +13,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="{{ route('customer.dashboard') }}">
+              <a class="nav-link" href="{{ route('logout.index') }}">
                 <span class="menu-title">Dashboard</span>
                 <i class="mdi mdi-home menu-icon"></i>
               </a>
@@ -74,6 +74,11 @@
             <li class="nav-item">
               <a class="nav-link" href="{{ route('auth.register') }}">
                 <span class="menu-title"> Register </span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ route('logout.index') }}">
+                <span class="menu-title"> Logout </span>
               </a>
             </li>
         </ul>

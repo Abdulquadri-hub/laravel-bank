@@ -1,34 +1,47 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\KycController;
 use App\Http\Controllers\auth\AuthController;
 use App\Http\Controllers\auth\LoginController;
+use App\Http\Controllers\auth\LogoutController;
 use App\Http\Controllers\auth\RegisterController;
-use App\Http\Controllers\auth\ForgotPasswordController;
-use App\Http\Controllers\auth\VerificationController;
 use App\Http\Controllers\customer\AccountController;
-use App\Http\Controllers\customer\DashboardController;
 use App\Http\Controllers\customer\DepositController;
+use App\Http\Controllers\auth\VerificationController;
 use App\Http\Controllers\customer\TransferController;
-use App\Http\Controllers\KycController;
+use App\Http\Controllers\customer\DashboardController;
+use App\Http\Controllers\auth\ForgotPasswordController;
 
 Route::group([
-    "prefix" => "auth"
+    "prefix" => "auth",
 ], function(){
     
+    #
     Route::get("/register", [RegisterController::class, "index"])->name("auth.register");
     Route::post("/register", [RegisterController::class, "save"]);
+    
+    #
     Route::get("/login", [LoginController::class, "index"])->name("auth.login");
     Route::post("/login", [LoginController::class, "login"]);
+
+    #
     Route::get("/forgotpassword", [ForgotPasswordController::class, "index"])->name("auth.forgotpassword");
     Route::post("/forgotpassword", [ForgotPasswordController::class, "save"]);
+
+    #
     Route::get("/verify-email/", [VerificationController::class, "index"])->name("auth.verify-email");
     Route::post("/verify-email/", [VerificationController::class, "verify"]);
     
 });
 
 
-Route::group([], function(){
+Route::group([
+    "middleware" => "auth",
+], function(){
+
+    #
+    Route::get("/logout", [LogoutController::class, "index"])->name("logout.index");
 
     Route::group([
         "prefix" => "c"
@@ -74,7 +87,8 @@ Route::group([], function(){
     });
 
     Route::group([
-        "prefix" => "admin"
+        "prefix" => "admin",
+        "middleware" => "admin"
     ], function(){
     
         //

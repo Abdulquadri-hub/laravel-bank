@@ -15,7 +15,7 @@
         
 
         <div class="main-panel">
-
+          @include("layouts.message")
           <div class="content-wrapper">
             @yield("content")
           </div>

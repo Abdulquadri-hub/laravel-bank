@@ -43,20 +43,20 @@ class LoginController extends Controller
                 $account = Account::where('user_id', $row->id)->first();
     
                 if (is_null($account)) {
-                    return redirect()->route('customer.account.create');
+                    return redirect()->route('customer.account.create')->with("error", "Complete your account registration");
                 }
     
                 $kyc = kyc::where('user_id', $row->id)->first();
     
                 if (is_null($kyc)) {
-                    return redirect()->route('customer.kyc.index');
+                    return redirect()->route('customer.kyc.index')->with("error", "Complete your KYC");
                 }
     
-                return redirect()->route('customer.dashboard');
+                return redirect()->route('customer.dashboard')->with("success", "Welcome back!");
                 
             }
             
-            return back()->withErrors(['email'=>'You must verify your email to access this service']);
+            return back()->withErrors(['email'=> 'You must verify your email to access this service']);
             
         }
         return back()->withErrors(['email'=>'Wrong login details']);

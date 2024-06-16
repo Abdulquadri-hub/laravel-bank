@@ -13,9 +13,12 @@ class DashboardController extends Controller
     public function index()
     {
         $customer = User::find(Auth::user()->id)->account()->first();
+        $transactions = $customer->transactions()->with(['deposit', 'transfer', 'account'])->paginate();
+        // dd($transactions);
 
         return view("customer.dashboard", [
-            "customer" => $customer
+            "customer" => $customer,
+            "transactions" => $transactions
         ]);
     }
 }

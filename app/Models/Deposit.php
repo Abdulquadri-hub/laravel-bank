@@ -27,8 +27,6 @@ class Deposit extends Model
 
     public function account()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Account::class);
     }
-
-    
 }

@@ -25,4 +25,20 @@ class Transaction extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function account()
+    {
+        return $this->belongsTo(Account::class);
+    }
+
+    public function transfer()
+    {
+        return $this->belongsTo(Transfer::class);
+    }
+
+    public function deposit()
+    {
+        return $this->belongsTo(Deposit::class);
+    }
+
 }

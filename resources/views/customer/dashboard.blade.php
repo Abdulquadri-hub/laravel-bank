@@ -82,58 +82,64 @@
                 <table class="table">
                   <thead>
                   <tr>
-                    <th> Assignee </th>
-                    <th> Subject </th>
+                    <th> Account </th>
+                    <th> Account No </th>
+                    <th> Amount </th>
                     <th> Status </th>
-                    <th> Last Update </th>
-                    <th> Tracking ID </th>
+                    <th> Initiate At</th>
+                    <th> Ref No </th>
                   </tr>
                   </thead>
                   <tbody>
-                  <tr>
-                    <td>
-                      <img src="assets/images/faces/face1.jpg" class="me-2" alt="image"> David Grey
-                    </td>
-                    <td> Fund is not recieved </td>
-                    <td>
-                      <label class="badge badge-gradient-success">DONE</label>
-                    </td>
-                    <td> Dec 5, 2017 </td>
-                    <td> WD-12345 </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <img src="assets/images/faces/face2.jpg" class="me-2" alt="image"> Stella Johnson
-                    </td>
-                    <td> High loading time </td>
-                    <td>
-                      <label class="badge badge-gradient-warning">PROGRESS</label>
-                    </td>
-                    <td> Dec 12, 2017 </td>
-                    <td> WD-12346 </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <img src="assets/images/faces/face3.jpg" class="me-2" alt="image"> Marina Michel
-                    </td>
-                    <td> Website down for one week </td>
-                    <td>
-                      <label class="badge badge-gradient-info">ON HOLD</label>
-                    </td>
-                    <td> Dec 16, 2017 </td>
-                    <td> WD-12347 </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <img src="assets/images/faces/face4.jpg" class="me-2" alt="image"> John Doe
-                    </td>
-                    <td> Loosing control on server </td>
-                    <td>
-                      <label class="badge badge-gradient-danger">REJECTED</label>
-                    </td>
-                    <td> Dec 3, 2017 </td>
-                    <td> WD-12348 </td>
-                  </tr>
+                  @if ($transactions)
+                    @foreach ($transactions as $transaction)
+                      <tr>
+                        <td>
+                          <img src="{{env('APP_FRONTEND_URL')}}/assets/images/logo.svg" class="me-2" alt="image">
+                        </td>
+                        <td> {{ $transaction->account->account_number }} </td>
+                        <td> 
+                          
+                            @if ($transaction->transaction_type === "credit")
+                              <i class="mdi mdi-plus"></i> {{ $transaction->amount }}
+                            @elseif ($transaction->transaction_type === "debit")
+                            <i class="mdi mdi-minus"></i> {{ $transaction->amount }}
+                            @endif
+                           
+                        </td>
+                        <td>
+                          <label class="badge badge-gradient-success">
+
+                            @if (!is_null($transaction->deposit_id))
+                              {{ $transaction->deposit->status }}
+                            @elseif (!is_null($transaction->transfer_id))
+                              {{ $transaction->transfer->status }}
+                            @elseif (!is_null($transaction->external_transfer_id))
+                              {{ $transaction->deposit->status }}
+                            @endif
+            
+                          </label>
+                        </td>
+                        <td> 
+                          {{ $transaction->created_at }}
+                        </td>
+                        <td> 
+
+                            @if (!is_null($transaction->deposit_id))
+                              {{ $transaction->deposit->reference }}
+                            @elseif (!is_null($transaction->transfer_id))
+                              {{ $transaction->transfer->reference }}
+                            @elseif (!is_null($transaction->external_transfer_id))
+                              {{ $transaction->deposit->reference }}
+                            @endif
+                          
+                        </td>
+                      </tr>
+                    @endforeach
+
+                  @else
+                    <h3 class="card-title text-center mt-3">No transactions found !!</h3>
+                  @endif
                   </tbody>
                 </table>
                 <a href="http://" class="">
